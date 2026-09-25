@@ -1,0 +1,62 @@
+services:
+  retail-postgres:
+    image: postgres:16-alpine
+    container_name: retail-postgres
+    environment:
+      POSTGRES_DB: retaildb
+      POSTGRES_USER: retail
+      POSTGRES_PASSWORD: retail
+    ports:
+      - "127.0.0.1:5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U retail -d retaildb"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+    volumes:
+      - retail-postgres-data:/var/lib/postgresql/data
+
+  retail-api-a:
+    build: .
+    image: eclipse-spring-boot-retail-api:debug
+    container_name: retail-api-a
+    depends_on:
+      retail-postgres:
+        condition: service_healthy
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+      SPRING_DATASOURCE_URL: jdbc:postgresql://retail-postgres:5432/retaildb
+      SPRING_DATASOURCE_USERNAME: retail
+      SPRING_DATASOURCE_PASSWORD: retail
+      RETAIL_PEER_URL: http://retail-api-b:8080
+      JAVA_TOOL_OPTIONS: "-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005"
+    ports:
+      - "127.0.0.1:8080:8080"
+      - "127.0.0.1:5005:5005"
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q -O - http://localhost:8080/actuator/health >/dev/null 2>&1 || exit 1"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  retail-api-b:
+    build: .
+    image: eclipse-spring-boot-retail-api:debug
+    container_name: retail-api-b
+    depends_on:
+      retail-postgres:
+        condition: service_healthy
+      retail-api-a:
+        condition: service_healthy
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+      SPRING_DATASOURCE_URL: jdbc:postgresql://retail-postgres:5432/retaildb
+      SPRING_DATASOURCE_USERNAME: retail
+      SPRING_DATASOURCE_PASSWORD: retail
+      JAVA_TOOL_OPTIONS: "-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5006"
+    ports:
+      - "127.0.0.1:8081:8080"
+      - "127.0.0.1:5006:5006"
+
+volumes:
+  retail-postgres-data:
