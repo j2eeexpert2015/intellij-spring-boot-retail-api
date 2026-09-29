@@ -11,11 +11,11 @@
 		<relativePath />
 	</parent>
 
-	<groupId>org.eclipsefeaturesdemo</groupId>
-	<artifactId>eclipse-spring-boot-retail-api</artifactId>
+	<groupId>org.intellijfeaturesdemo</groupId>
+	<artifactId>intellij-spring-boot-retail-api</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
-	<name>eclipse-spring-boot-retail-api</name>
-	<description>Retail Product and Inventory API for Eclipse, STS, Docker, and
+	<name>intellij-spring-boot-retail-api</name>
+	<description>Retail Product and Inventory API for Intellij, STS, Docker, and
 		JUnit demos</description>
 
 	<properties>
