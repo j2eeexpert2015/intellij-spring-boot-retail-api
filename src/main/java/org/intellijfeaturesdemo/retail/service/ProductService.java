@@ -66,6 +66,16 @@ public class ProductService {
         return toResponse(productRepository.save(product));
     }
 
+    public List<InventoryReportRow> generateInventoryReportWithBadFormatting() { List<Product> products = productRepository.findByActiveTrueOrderByNameAsc(); List<InventoryReportRow> reportRows = new ArrayList<>();
+
+        for (Product product : products) { BigDecimal inventoryValue = product.getPrice().multiply(BigDecimal.valueOf(product.getAvailableQuantity())); boolean lowStock = product.getAvailableQuantity() <= retailProperties.lowStockThreshold();
+
+            reportRows.add(new InventoryReportRow(product.getId(), product.getName(), product.getCategory(), product.getPrice(), product.getAvailableQuantity(), inventoryValue, lowStock)); }
+
+        return reportRows; }
+
+
+
     public List<InventoryReportRow> generateInventoryReport() {
         List<Product> products =
                 productRepository.findByActiveTrueOrderByNameAsc();
